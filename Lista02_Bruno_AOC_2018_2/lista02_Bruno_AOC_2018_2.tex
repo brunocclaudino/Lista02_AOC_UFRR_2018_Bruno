@@ -1,0 +1,165 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[top=2cm, bottom=2cm, left=2.5cm, right=2.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{enumerate}
+\usepackage[brazil]{babel}
+\usepackage{graphicx}
+\usepackage{indentfirst}
+
+\begin{document}
+\begin{titlepage}
+\begin{center}
+
+\textbf{Lista 02 - AOC 2018.2\\
+Bruno Cesar da Silva Claudino - 1201424425\\}
+\vspace{2cm}
+\textbf{Respostas}
+	
+\end{center}
+\begin{enumerate}[1)]
+	\item
+	\textbf{As vantagens de um processador multiciclo com a relação ao processador uniciclo ,são que diferentemente do uniciclo que nem todos os componentes são executados em uma execução de instrução,visto que a execução da instrução é feita em um único ciclo de clock . Na execução do multiciclo as instruçoes são divididas em 5 etapas: Busca de instrução, decodificação, busca de operandos, execução e armazenamento do resultado. Em um ciclo de clock é executado um componente para a estapa que esta sendo solicitada, logo cada ciclo faz menos coisas, isso quer dizer que os ciclos podem ser mais curtos. Então como o multiciclo é dividido em 5 etapas e cada etapa é realizada em um ciclo de clock, assim, o ciclo de clock do multicilo é 6 vezes mais curto que o do uniciclo, sua implementação é semelhante ao uniciclo, porem com uma quantidade menor de componentes no caminho de dados, mas sua implementação possui uma lógica de complexidade maior. O multiciclo ainda pode implementar pipeline que é uma técnica que permite a execução de instruções em paralelismo.}
+	\item
+	\textbf{Para a implementação do pipeline no multiciclo são necessárias as seguintes modificações no multiciclo:\\}
+	\begin{itemize}
+		\item \textbf{Registradores que funcionarão como buffers temporários, onde serão armazenados os resultados dos componentes e o estado em que a instrução se encontra.}
+		\item \textbf{Flags para a UC(Unidade de Controle) ter o controle dos registradores adicionais.}
+		\item \textbf{Tratamento de stalls evitando a parada do pipeline e das instruções, garantindo um funcionamento eficiente do pipeline.}
+	\end{itemize}
+	\item \textbf{Para um processador sem o pipeline funcionará da seguinte maneira:
+	Serão um ciclo de clock para cada uma das etapas de uma instrução, então:}
+	\begin{center}
+	\begin{tabular}{|c|c|c|}
+		\hline
+		Linhas & Instrução & Ciclos \\ \hline
+		1 & subi \$t2,\$t2,4 & 4 \\ \hline
+		2 & lw \$t1,0(\$t2) & 5 \\ \hline
+		3 & add \$t3,\$t1,\$t4 & 4 \\ \hline
+		4 & add \$t4,\$t3,\$t3 & 4 \\ \hline
+		5 & sw \$t4,0(\$t2) & 4 \\ \hline
+		6 & beq \$t2,\$0,loop & 3 \\ \hline
+		- & Total & 24 \\ \hline			
+	\end{tabular}
+	\end{center}
+	\textbf{Para um processador com o pipeline funcionará da seguinte maneira:}
+	\begin{center}
+		\begin{tabular}{|c|c|c|}
+			\hline
+			Ciclos & Etapa(Linha) & Consequente \\ \hline
+			1 & IF(1)&  \\ \hline
+			2 & ID(1), IF(2)&  \\ \hline
+			3 & EX(1), STALL(2) & Conflito de dados.Depende do resultado da linha 1\\ \hline
+			4 & WB(1), STALL(2) &  \\ \hline
+			5 & ID(2), IF(3) &  \\ \hline
+			6 & EX(2), STALL(3) &  Conflito de dados.Depende do resultado da linha 2. \\ \hline
+			7 & MEM(2), STALL(2) &  \\ \hline
+			8 & WB(2), STALL(3) &  \\ \hline
+			9 & ID(3), IF(4) &  \\ \hline
+			10 & EX(3), STALL(4)&Conflito de dados.Depende do resultado da linha 3\\ \hline
+			11 & WB(3), STALL(4) &  \\ \hline
+			12 & ID(4), IF(5) &  \\ \hline
+			13 & EX(4), ID(5) &  \\ \hline
+			14 & WB(4), EX(5) &  \\ \hline
+			15& MEM(5),STALL(6)&Conflito estrutural.2 instruções acessando a memória juntamente. \\ \hline
+			16 &  IF(6)&  \\ \hline
+			17 & ID(6) &  \\ \hline
+			18 & EX(6) &  \\ \hline			
+		\end{tabular}
+	\end{center}
+	\textbf{Logo o speedup é de  }$\frac{24}{18}\cong 1,33$.
+	
+	\item 
+	\begin{itemize}
+		\item
+		\textbf{RAW:\\(sub.d e div.d): para a sub.d ser calculada é necessário que a div.d calcule o valor para F1.}
+		\item
+		\textbf{WAW:\\(s.d e sub.d): para s.d é necessário que o valor de F4 seja calculado na linha 2.}
+		\item
+		\textbf{WAR:
+			\\(add.d e sub.d): O valor de F5 é sobrescrito no linha 4.
+			\\Na linha 5 possui WAW onde F4 é sobrescrito na linha 3, RAW, onde F5 precisa ser calculado na linha 4.}
+		\item
+		\textbf{\\Na linha 5 possui WAW onde F4 é sobrescrito na linha 3, RAW, onde F5 precisa ser calculado na linha 4.}
+	\end{itemize}
+	 \item 
+	 \textbf{\\$CPU execution time = (CPU clock cycles + Memory stall cycles*Clock cycle)
+	 	\\CPU execution time =(IC*CPI)*Clock cycle
+	 	\\CPU execution time =IC*1*Clock cycle
+	 	\\
+	 	\\Memory stall cycles = IC*(Memocy accesses/Instruction)*Miss rate * miss penalty
+	 	\\Memory stall cycles = IC*(1+0.5)*0.02*25
+	 	\\Memory stall cycles = IC*0.75
+	 	\\
+	 	\\CPU execution time(cache) = (IC*1.0 + IC*0.75)* Clock cycle
+	 	\\CPU execution time(cache) = 1.75*IC* Clock cycle
+	 	\\$}
+ 	\begin{center}	
+ 	\begin{tabular}{|c|}
+ 		\hline
+ 		\\$\frac{CPU execution time(cache)}{CPU execution time} = \frac{1.75*IC* Clock cycle}{1*IC* Clock cycle} = 1.75$
+		\\\\ 		\hline
+	\end{tabular} 	
+	\end{center}	
+	 
+	 \item 
+	 \begin{itemize}
+	 	\item
+	 	\textbf{Write through: escrita ao mesmo tempo no cache e na memória.}
+	 	\begin{itemize}
+	 		\item 
+	 		\textbf{Vantagens:}
+	 		\begin{itemize}
+	 			\item 
+	 			\textbf{Fácil de implementar.}
+	 			\item 
+	 			\textbf{Um "cache-miss" nunca resulta em escritas na memória.}
+	 			\item 
+	 			\textbf{A memória tem sempre a informação mais recente.}
+	 		\end{itemize}
+ 		\item
+ 		\textbf{Desvantagens:}
+ 		\begin{itemize}
+ 			\item 
+ 			\textbf{A escrita é lenta;}
+ 			\item 
+ 			\textbf{Cada escrita necessita de um acesso à memória.}
+ 			\item 
+ 			\textbf{Consequentemente usa mais largura de banda da memória.}
+ 		\end{itemize}
+ 	 	\end{itemize}
+  	
+  	\item
+  	\textbf{Write back: escrita somente no cache e atualização na memória somente na substituição do bloco.}
+  	\begin{itemize}
+  		\item 
+  		\textbf{Vantagens:}
+  		\begin{itemize}
+  			\item 
+  			\textbf{A escrita ocorre à velocidade do cache;}
+  			\item 
+  			\textbf{Escritas múltiplas de um endereço requerem apenas uma escrita na memória;}
+  			\item 
+  			\textbf{Consome menos largura de banda.}
+  		\end{itemize}
+  		\item
+  		\textbf{Desvantagens:}
+  		\begin{itemize}
+  			\item 
+  			\textbf{Difícil de implementar;}
+  			\item 
+  			\textbf{Nem sempre existe consistência entre os dados existentes no cache e na memória;}
+  			\item 
+  			\textbf{Leituras de blocos de endereços no cache podem resultar em escritas de blocos de endereços "dirty" na memória.}
+  		\end{itemize}
+  	\end{itemize}
+ 	\item
+  	\textbf{Localidade Temporal: Se um item é referenciado, ele tende a ser referenciado novamente dentro de um espaço de tempo curto. Se o estudante tiver trazido o livro recentemente para sua mesa, é provável que o faça em breve novamente.}
+  	\item
+  	\textbf{Localidade Espacial: Se um item é referenciado, itens cujos endereços sejam próximos dele tendem a ser logo referenciados.}
+	 	
+	 \end{itemize}
+\end{enumerate}
+\end{titlepage}
+\end{document}
